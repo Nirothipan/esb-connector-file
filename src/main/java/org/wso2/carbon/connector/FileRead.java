@@ -47,7 +47,7 @@ public class FileRead extends AbstractConnector implements Connector {
         try {
             manager = FileConnectorUtils.getManager();
             fileObj = manager.resolveFile(fileLocation, FileConnectorUtils.init(messageContext));
-            boolean patternFileExist = true;
+            boolean fileExistsWithSpecifiedPattern = true;
             if (fileObj.exists()) {
                 if (fileObj.getType() == FileType.FOLDER) {
                     FileObject[] children = fileObj.getChildren();
@@ -64,12 +64,8 @@ public class FileRead extends AbstractConnector implements Connector {
                             }
                         }
                         if (!bFound) {
-                        	patternFileExist= false;
+                            fileExistsWithSpecifiedPattern = false;
                             log.warn("File does not exists for the mentioned pattern.");
-                            /*2018.2.13 don't need exception caihemm justin.xie
-                            handleException("File does not exists for the mentioned pattern.",
-                                    messageContext);
-                            */
                         }
                     } else {
                         fileObj = children[0];
@@ -83,11 +79,11 @@ public class FileRead extends AbstractConnector implements Connector {
                 handleException("File/Folder does not exists", messageContext);
             }
             // Set the property for file name.
-            if(patternFileExist) {
+            if (fileExistsWithSpecifiedPattern) {
                 messageContext.setProperty("readingFileName", fileObj.getName().getBaseName());
                 ResultPayloadCreate.buildFile(fileObj, messageContext, contentType, streaming);
-            }else {
-            	messageContext.setProperty("readingFileName", null);
+            } else {
+                messageContext.setProperty("readingFileName", null);
             }
 
             if (log.isDebugEnabled()) {
